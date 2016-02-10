@@ -110,12 +110,8 @@ void SERIAL_SendStringLn(char* string)			//***Send a string of caracter, skip a 
 		SERIAL_SendCaracter(string[i]);
 		i++;
 	}
-	while (i > 0)
-	{
-		SERIAL_SendCaracter(0x08);		// Backspace
-		i--;
-	}
 	SERIAL_SendCaracter(10);			// ascii caracter for return	
+	SERIAL_SendCaracter(13);
 }
 void SERIAL_SendCaracterLn(char data)			//***Send a caracter, skip a line and come back to starting point***
 {
@@ -124,8 +120,8 @@ void SERIAL_SendCaracterLn(char data)			//***Send a caracter, skip a line and co
 	;
 	/* Put data into buffer, sends the data */
 	UDR0 = data;
-	SERIAL_SendCaracter(0x08);					// Backspace
-	SERIAL_SendCaracter(0x0A);					// Line return
+	SERIAL_SendCaracter(10);					// Backspace
+	SERIAL_SendCaracter(13);					// Line return
 }
 
 char SERIAL_READ()				//***Read serial data comming on the RX pin***
