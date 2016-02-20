@@ -1,7 +1,9 @@
 char * DataReceived;
 
-NRF_SET_PRX();	
+NRF_SET_PRX();
+NRF_Control(ACTIVE);	
 NRF_Listen();
+NRF_Control(STANBY);
 
 if (!(IRQ_PORT_READ & (1<<IRQ_PIN)))											
 {

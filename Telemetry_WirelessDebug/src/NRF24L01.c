@@ -192,7 +192,7 @@ void NRF_SET_PTX()
 	//NRF_WriteRXADDR_P1('A','L','L','O','A');		// set RX_ADDR_P1 address
 	NRF_WriteTXADDR('F','U','C','K','U');		// set TX_ADDR
 	//NRF_WriteTXADDR3byte(0x01,0x01,0x01);
-	NRF_WriteRegister(RX_PW_P0, 2);
+	NRF_WriteRegister(RX_PW_P0, 1);
 	//NRF_WriteRegister(RX_PW_P1, 2);
 	//NRF_WriteRegister(RX_PW_P2, 5);
 	//NRF_WriteRegister(RX_PW_P3, 5);
