@@ -13,8 +13,8 @@
 #include <util/delay.h>
 
 
-#define IRQ_PIN  4
-#define IRQ_PORT_READ PIND
+#define IRQ_PIN			2
+#define IRQ_PORT_READ	PIND
 
 int main(void)
 {
@@ -65,22 +65,29 @@ int main(void)
 	*/
 	char Status;
 	DDRB |=(1<<CE);
+	//char data[30];
+	//int i = 0;
+
 	
 	SERIAL_Init(9600,'D',1,8,'R');
 	SPI_InitMaster(0,'M',8,'B',2);
-	char data = 'A';
+	char data[1];
 	NRF_SET_PTX();
 	
 	 
 	 while(1)
 	 {
-		 _delay_ms(1000);
 		 NRF_Control(STANBY);
 		 NRF_FlushFifo(TX);
-		 NRF_LoadTXPayload(&data,1);
+		 data[0]  = SERIAL_READ();
+		 SERIAL_SendCaracter(data[0]);
+		 NRF_LoadTXPayload(data,1);
 		 NRF_ActivateTransmission();
+
+		 
 		 while ((IRQ_PORT_READ & (1<<IRQ_PIN)))
 		 {
+		 }
 			 Status = NRF_ReadStatusRegister();
 			 if (Status & (1<<MAX_RT))				// If the maximum of retry was reached (transmission FAILED).
 			 {
@@ -89,9 +96,9 @@ int main(void)
 			 }
 			 else if (Status & (1<<TX_DS))				// If the transmission was successful.
 			 {
-				 NRF_WriteRegister(STATUS, (1<<TX_DS));		// Reset register.
+				 NRF_WriteRegister(STATUS, (1<<TX_DS));		// Reset register.			 
 			 }
-		 }
+		 
 	 }
 }
 
