@@ -11,6 +11,7 @@
 #include "src/SERIAL_COM_328P.h"
 #include "src/SPI_COM_328P.h"
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 
 #define IRQ_PIN			2
@@ -63,42 +64,57 @@ int main(void)
 		i++;
     }
 	*/
-	char Status;
-	DDRB |=(1<<CE);
-	//char data[30];
-	//int i = 0;
+
+	DDRB |=(1<<CE); //SET CE TO OUTPUT.
+	
+	DDRB &= ~(1<< DDD2); //SET PD2 TO INPUT
+	PORTD |= (1<<PORTD2);//SET PD2 TO HIGH
+	
+	EICRA |= (1<<ISC10);
+	EIMSK |= (1<<INT0);
+	
+	
+	sei();
 
 	
 	SERIAL_Init(9600,'D',1,8,'R');
 	SPI_InitMaster(0,'M',8,'B',2);
 	char data[1];
 	NRF_SET_PTX();
-	
+	SERIAL_SendCaracter('>');
 	 
 	 while(1)
 	 {
 		 NRF_Control(STANBY);
 		 NRF_FlushFifo(TX);
 		 data[0]  = SERIAL_READ();
+		 if(data[0] == 13)
+			{
+			SERIAL_SendStringLn(data[0]);
+			}
+			
 		 SERIAL_SendCaracter(data[0]);
 		 NRF_LoadTXPayload(data,1);
 		 NRF_ActivateTransmission();
-
-		 
-		 while ((IRQ_PORT_READ & (1<<IRQ_PIN)))
-		 {
-		 }
-			 Status = NRF_ReadStatusRegister();
-			 if (Status & (1<<MAX_RT))				// If the maximum of retry was reached (transmission FAILED).
-			 {
-				 NRF_FlushFifo(TX);
-				 NRF_WriteRegister(STATUS, (1<<MAX_RT));		// Reset register.
-			 }
-			 else if (Status & (1<<TX_DS))				// If the transmission was successful.
-			 {
-				 NRF_WriteRegister(STATUS, (1<<TX_DS));		// Reset register.			 
-			 }
-		 
+		_delay_ms(1);
 	 }
+	 
+}
+
+char Status;
+
+ISR(INT0_vect) {
+		//NRF_PrintStatusRegister();
+		 Status = NRF_ReadStatusRegister();
+		 if (Status & (1<<MAX_RT))				// If the maximum of retry was reached (transmission FAILED).
+		 {
+			 NRF_FlushFifo(TX);
+			 NRF_WriteRegister(STATUS, (1<<MAX_RT));		// Reset register.
+		 }
+		 else if (Status & (1<<TX_DS))				// If the transmission was successful.
+		 {
+			 //NRF_PrintStatusRegister();
+			 NRF_WriteRegister(STATUS, (1<<TX_DS));		// Reset register.
+		 }
 }
 
